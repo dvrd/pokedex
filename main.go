@@ -22,9 +22,9 @@ func main() {
 		command, found := commands.Get()[input[0]]
 
 		if found {
-			err := command.Callback()
+			err := command.Callback(input[1:])
 			if err != nil {
-				fmt.Println("ERROR: ", err)
+				fmt.Println(err)
 			}
 		} else {
 			fmt.Println("Unknown command")

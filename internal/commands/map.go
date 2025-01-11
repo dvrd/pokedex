@@ -6,24 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
-
-	"github.com/dvrd/pokedex/internal/pokecache"
 )
 
-type Area struct {
-	Url  string
-	Name string
-}
-
-var PokeCache *pokecache.Cache = pokecache.NewCache(10 * time.Second)
-var baseUrl string = "https://pokeapi.co/api/v2/location-area"
 var next int = 0
 var prev int = 0
 var limit int = 20
 
-func getArea(offset int, dir string) ([]Area, error) {
-	url := fmt.Sprintf("%s?offset=%d&limit=%d", baseUrl, offset, limit)
+func getArea(offset int, dir string) ([]Entity, error) {
+	url := fmt.Sprintf("%s?offset=%d&limit=%d", baseLocationUrl, offset, limit)
 	bodyBytes, found := PokeCache.Get(url)
 
 	if !found {
@@ -34,7 +24,7 @@ func getArea(offset int, dir string) ([]Area, error) {
 		defer res.Body.Close()
 
 		if res.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("ERROR: request failed with status %v", res.Status)
+			return nil, fmt.Errorf("request failed with status %v", res.Status)
 		}
 
 		bodyBytes, err = io.ReadAll(res.Body)
@@ -43,13 +33,6 @@ func getArea(offset int, dir string) ([]Area, error) {
 		}
 
 		PokeCache.Add(url, bodyBytes)
-	}
-
-	type AreaResponse struct {
-		Count    int
-		Results  []Area
-		Next     string
-		Previous string
 	}
 
 	var jsonResponse AreaResponse
@@ -74,7 +57,7 @@ func getArea(offset int, dir string) ([]Area, error) {
 	return jsonResponse.Results, nil
 }
 
-func Map() error {
+func Map(args []string) error {
 	locations, err := getArea(next, "next")
 	if err != nil {
 		return err
@@ -87,7 +70,7 @@ func Map() error {
 	return nil
 }
 
-func MapPrevious() error {
+func MapPrevious(args []string) error {
 	if prev == 0 && next == 0 {
 		fmt.Println("You're on the first page")
 		return nil
