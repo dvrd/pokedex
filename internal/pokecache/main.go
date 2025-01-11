@@ -45,15 +45,21 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 }
 
 func (c *Cache) reapLoop(interval time.Duration) {
-	then := time.Now()
-	time.Sleep(interval)
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+	for {
+		select {
+		case <-ticker.C:
+			c.lock.Lock()
 
-	for key, val := range c.data {
-		if then.Sub(val.createdAt) > 0 {
-			delete(c.data, key)
+			for key, val := range c.data {
+				if time.Since(val.createdAt) > interval {
+					delete(c.data, key)
+				}
+			}
+
+			c.lock.Unlock()
 		}
 	}
 }
