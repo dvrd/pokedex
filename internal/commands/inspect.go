@@ -10,7 +10,7 @@ func Inspect(args []string) error {
 		return nil
 	}
 
-	pokemon, found := Pokedex[args[0]]
+	pokemon, found := PokedexMap[args[0]]
 
 	if !found {
 		fmt.Println("you have not caught that pokemon")

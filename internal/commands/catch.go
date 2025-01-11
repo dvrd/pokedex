@@ -9,26 +9,6 @@ import (
 	"net/http"
 )
 
-type PokemonStat struct {
-	BaseStat int    `json:"base_stat"`
-	Stat     Entity `json:"stat"`
-}
-
-type PokemonType struct {
-	Type Entity `json:"type"`
-}
-
-type Pokemon struct {
-	Name           string        `json:"name"`
-	BaseExperience int           `json:"base_experience"`
-	Height         int           `json:"height"`
-	Weight         int           `json:"weight"`
-	Stats          []PokemonStat `json:"stats"`
-	Types          []PokemonType `json:"types"`
-}
-
-var Pokedex map[string]Pokemon = map[string]Pokemon{}
-
 func Catch(args []string) error {
 	if len(args) < 1 {
 		fmt.Println("Select a Pokemon to attempt to catch")
@@ -68,8 +48,8 @@ func Catch(args []string) error {
 	fmt.Printf("Throwing a Pokeball at %s...\n", jsonResponse.Name)
 	random := rand.Intn(jsonResponse.BaseExperience)
 	if ((random * 100) / jsonResponse.BaseExperience) >= 50 {
-		fmt.Printf("%s was caught!\n", jsonResponse.Name)
-		Pokedex[jsonResponse.Name] = jsonResponse
+		fmt.Printf("%s was caught!\nYou may now inspect it with the inspect command.\n", jsonResponse.Name)
+		PokedexMap[jsonResponse.Name] = jsonResponse
 	} else {
 		fmt.Printf("%s escaped!\n", jsonResponse.Name)
 	}
